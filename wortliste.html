@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<!-- 
+Author: wolfmond
+Version: 2024-09-27
+
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <http://unlicense.org/>
+-->
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10 zufällige Wörter in CW</title>
+	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>💜</text></svg>">
+	<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, max-image-preview:none, notranslate" />
+    <!--<script src="https://fkurz.net/ham/jscwlib/src/jscwlib.js"></script>-->
+    <script src="jscwlib.js"></script>
+</head>
+<body>
+    <div id="player"></div>
+	<div id="text"></div>
+
+    <script>
+		async function loadWordList() {
+            if (!localStorage.getItem('wordList')) {
+                const response = await fetch('wortliste.txt');
+                const text = await response.text();
+				const wordList = text
+                    .split('\n')  
+                    .map(line => line.trim())  
+                    .filter(line => line.length > 0);
+                localStorage.setItem('wordList', JSON.stringify(wordList));
+            }
+            return JSON.parse(localStorage.getItem('wordList'));
+        }
+		
+        function getRandomWords(wordList, count = 10) {
+            const randomWords = [];
+            const wordListCopy = [...wordList];  
+
+            for (let i = 0; i < count; i++) {
+                const randomIndex = Math.floor(Math.random() * wordListCopy.length);
+                randomWords.push(wordListCopy.splice(randomIndex, 1)[0]);  
+            }
+
+            return randomWords;
+        }
+
+        
+        (async function () {
+            const wordList = await loadWordList();
+            const randomWords = getRandomWords(wordList);
+			const textToPlay = randomWords.join(' ');
+			const showtext = document.getElementById("text");
+			var m = new jscw();
+			m.setWpm(20);  
+            m.setText(textToPlay);
+			m.setEff(20);
+			m.setStartDelay(4);
+			m.onCharacterPlay = function (c) {   
+				setTimeout(function() {
+					showtext.textContent += c.c;
+				}, 1000); 
+			}
+            m.renderPlayer('player', m);})();
+    </script>
+</body>
+</html>
